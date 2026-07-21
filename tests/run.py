@@ -50,6 +50,54 @@ for p in lessons:
     check(f"{p.name}: untouched skeleton exits NONZERO (checks are "
           f"non-vacuous)", lab.returncode != 0)
 
+
+print("\nHISTORY + LEDGER (sealed grading history; claims backed by "
+      "lessons_checks.py)")
+import json
+sys.path.insert(0, str(ROOT))
+import claims as _claims
+import lessons_checks as _lc
+
+MANDIR = ROOT / "manifests"
+MANDIR.mkdir(exist_ok=True)
+MP = MANDIR / "lessons_manifest.json"
+_prior = []
+if MP.exists():
+    _prior = json.loads(MP.read_text())
+    check("committed grading history replays without its writer",
+          _lc.replay(_prior) is True,
+          "possible tampering — file preserved as evidence")
+if not fails:
+    _body = {"event": "grading-run", "kernel": SEALED,
+             "lessons": 9, "both_directions": True}
+    _last = {k: v for k, v in (_prior[-1] if _prior else {}).items()
+             if k not in ("sha", "sha_prev")}
+    if _last != _body and _lc.replay(_prior) in (True, None):
+        prev = _prior[-1]["sha"] if _prior else "GENESIS"
+        sha = hashlib.sha256((prev + json.dumps(_body, sort_keys=True))
+                             .encode()).hexdigest()[:16]
+        _prior.append({**_body, "sha_prev": prev, "sha": sha})
+        MP.write_text(json.dumps(_prior, indent=1))
+
+for _name, _fn in _lc.CHECKS.items():
+    try:
+        check(_name, _fn() is True)
+    except Exception as _e:
+        check(_name, False, f"{type(_e).__name__}: {_e}")
+_ledgered = {c["check"] for _, cs in _claims.SECTIONS
+             for c in cs if c.get("check")}
+check("ledgered checks == registry (no dangling, no orphans)",
+      _ledgered == set(_lc.CHECKS))
+
+print("""
+NOT claimed: that the labs teach PL — the gate proves the course
+    grades what it claims to grade, nothing about what a student
+    takes away.
+NOT claimed: that PL is the right map — the course teaches an
+    instrument and prices it; adopting it is the reader's theta.
+NOT claimed: that the lesson order is forced — sequence and
+    difficulty are editorial, sealed as such.""")
+
 print("\n" + ("BUILD PASSED — the course grades what it claims to grade"
               if not fails else f"BUILD FAILED: {fails}"))
 sys.exit(1 if fails else 0)
