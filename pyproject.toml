@@ -1,0 +1,7 @@
+[project]
+name = "pl-lessons"
+version = "1.0.0"
+description = "The MathofLogic course: analysing, designing, coding, and debugging formal systems — graded by the sealed Propagation Logic kernel."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = []          # stdlib only; the kernel is vendored and sealed
