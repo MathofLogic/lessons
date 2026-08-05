@@ -1,5 +1,0 @@
-{
-  "registry": {"import": ["lessons_checks"],
-               "attr": "lessons_checks:CHECKS"},
-  "mutate": ["pl.py", "course.py", "lessons_checks.py"]
-}
