@@ -99,10 +99,9 @@ NOT claimed: that the lesson order is forced — sequence and
     difficulty are editorial, sealed as such.""")
 
 # ── VACUITY CANARY ────────────────────────────────────────────────────
-# Regression for the defect where a carrier with an empty designated set
-# scored as well as strong Kleene, because four of the five guarded laws
-# passed with their guard inert. A law that holds over zero witnesses was
-# never tested, and must not read as a pass.
+# A law engine must tell a carrier that passed from one that was never
+# tested. A guarded law on a degenerate designated set holds over zero
+# witnesses, and zero witnesses is not a pass.
 try:
     import os as _os, sys as _sys
     _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
